@@ -139,6 +139,10 @@ urlpatterns = [
 curl --header "Content-Type: application/json" -X POST http://127.0.0.1:8000/api/token/obtain/ --data '{"username":"user","password":"password"}'
 ```
 
+拿到的 token 有分兩種
+- access token
+- refresh token
+
 Refresh token
 ```
 curl --header "Content-Type: application/json" -X POST http://127.0.0.1:8000/api/token/refresh/ --data '{"refresh":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTU2MTYyMTg0OSwianRpIjoiYmE3OWUxZTEwOWJkNGU3NmI1YWZhNWQ5OTg5MTE0NjgiLCJ1c2VyX2lkIjoxfQ.S7tDJaaymUUNs74Gnt6dX2prIU_E8uqCPzMtd8Le0VI"}'
@@ -184,3 +188,4 @@ urlpatterns = [
 ```
 
 
+Register user
