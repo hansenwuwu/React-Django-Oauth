@@ -24,4 +24,5 @@ class CustomUserCreate(APIView):
 
 class HelloWorldView(APIView):
     def get(self, request):
-        return Response(data={"hello":"world"}, status=status.HTTP_200_OK)
+        user = request.user
+        return Response(data={"hello":"world", "user": user.username, "title": user.title}, status=status.HTTP_200_OK)

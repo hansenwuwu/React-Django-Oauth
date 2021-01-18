@@ -14,7 +14,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 
 import axiosApi from '../api/axiosApi';
-import axios from 'axios';
+import { useHistory } from 'react-router-dom';
 
 function Copyright() {
     return (
@@ -50,6 +50,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function Login() {
+    let history = useHistory();
     const classes = useStyles();
 
     const [username, setUsername] = useState("");
@@ -74,6 +75,7 @@ export default function Login() {
             localStorage.setItem('access_token', res.access);
             localStorage.setItem('refresh_token', res.refresh);
             axiosApi.axiosInstance.defaults.headers['Authorization'] = "Bearer " + res.access;
+            history.push('/testAuth');
         }).catch(err => {
             console.log(err);
         });

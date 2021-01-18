@@ -48,6 +48,12 @@ const apiUserLogin = (data) => {
         });
 };
 
+const apiUserLogout = () => {
+    axiosInstance.defaults.headers['Authorization'] = "";
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+}
+
 const getHello = () => {
     return axiosInstance
         .get('hello')
@@ -58,4 +64,4 @@ const getHello = () => {
         });
 }
 
-export default { axiosInstance, apiUserLogin, getHello };
+export default { axiosInstance, apiUserLogin, apiUserLogout, getHello };
