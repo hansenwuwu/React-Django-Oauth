@@ -189,3 +189,52 @@ urlpatterns = [
 
 
 Register user
+
+## Google sign in (or other Oauth)
+### requirements
+```
+pip install allauth
+pip install django-rest-auth
+```
+
+all-auth 第三方登入的資料庫
+django rest auth 管理 API 
+
+### settings.py
+```
+INSTALLED_APPS = [
+    ...
+    'django.contrib.sites',
+
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
+
+    'rest_auth'
+]
+```
+
+```
+python manage.py migrate
+```
+
+### views.py
+```
+from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
+from rest_auth.registration.views import SocialLoginView
+
+class GoogleLogin(SocialLoginView):
+    adapter_class = GoogleOAuth2Adapter
+```
+
+### urls.py
+```
+from .views import GoogleLogin
+
+urlpatterns = [
+    ...,
+    path('rest-auth/google/', GoogleLogin.as_view(), name="google_login"),
+]
+```
+

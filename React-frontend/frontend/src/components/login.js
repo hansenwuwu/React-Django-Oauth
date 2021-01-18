@@ -16,6 +16,8 @@ import Container from '@material-ui/core/Container';
 import axiosApi from '../api/axiosApi';
 import { useHistory } from 'react-router-dom';
 
+import { GoogleLogin } from 'react-google-login';
+
 function Copyright() {
     return (
         <Typography variant="body2" color="textSecondary" align="center">
@@ -82,6 +84,12 @@ export default function Login() {
 
     }
 
+    const responseGoogle = (response) => {
+        // let googleResponse = await googleLogin(response.accessToken);
+        // console.log(googleResponse);
+        console.log('response google: ', response);
+    }
+
     return (
         <Container component="main" maxWidth="xs">
             <CssBaseline />
@@ -143,6 +151,15 @@ export default function Login() {
                         </Grid>
                     </Grid>
                 </form>
+
+                <GoogleLogin
+                    clientId="825125488667-64c1nnp90qase1f6s1okgc2glq8vc84j.apps.googleusercontent.com"
+                    buttonText="Login"
+                    onSuccess={responseGoogle}
+                    onFailure={responseGoogle}
+                    cookiePolicy={'single_host_origin'}
+                />
+
             </div>
             <Box mt={8}>
                 <Copyright />
