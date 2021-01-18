@@ -85,20 +85,15 @@ export default function Login() {
     }
 
     const responseGoogle = async (response) => {
-        // console.log(response.accessToken);
         let googleResponse = await axiosApi.googleLogin(response.accessToken);
-        // console.log(googleResponse.status);
-        // console.log('response google: ', response);
+
         if (googleResponse.status === 200) {
-            // let data = JSON.parse(googleResponse.data.access_token);
-            // console.log(googleResponse.data.access_token);
-            // console.log(googleResponse.config.data["access_token"]);
-            // console.log('data.access_token: ', data.access_token);
             localStorage.setItem('access_token', googleResponse.data.access_token);
             localStorage.setItem('refresh_token', googleResponse.data.refresh_token);
             axiosApi.axiosInstance.defaults.headers['Authorization'] = "Bearer " + googleResponse.data.access_token;
             history.push('/testAuth');
         }
+
     }
 
     return (
