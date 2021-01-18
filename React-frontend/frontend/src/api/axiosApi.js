@@ -54,6 +54,17 @@ const apiUserLogout = () => {
     localStorage.removeItem('refresh_token');
 }
 
+const googleLogin = async (accesstoken) => {
+    let res = await axios.post(
+        "http://localhost:8000/api/dj-rest-auth/google/",
+        {
+            access_token: accesstoken,
+        }
+    );
+    // console.log('service google login res: ', res);
+    return await res;
+};
+
 const getHello = () => {
     return axiosInstance
         .get('hello')
@@ -64,4 +75,10 @@ const getHello = () => {
         });
 }
 
-export default { axiosInstance, apiUserLogin, apiUserLogout, getHello };
+export default {
+    axiosInstance,
+    apiUserLogin,
+    apiUserLogout,
+    getHello,
+    googleLogin
+};

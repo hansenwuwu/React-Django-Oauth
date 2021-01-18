@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 from .serializers import MyTokenObtainPairSerializer, CustomUserSerializer
 
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
-from rest_auth.registration.views import SocialLoginView
+from dj_rest_auth.registration.views import SocialLoginView
 
 class ObtainTokenPairWithCutsomView(TokenObtainPairView):
     permission_classes = (permissions.AllowAny,)
@@ -31,4 +31,5 @@ class HelloWorldView(APIView):
         return Response(data={"hello":"world", "user": user.username, "title": user.title}, status=status.HTTP_200_OK)
 
 class GoogleLogin(SocialLoginView):
+    permission_classes = (permissions.AllowAny,)
     adapter_class = GoogleOAuth2Adapter

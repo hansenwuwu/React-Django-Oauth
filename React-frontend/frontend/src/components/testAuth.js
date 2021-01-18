@@ -12,7 +12,7 @@ function TestAuth() {
     useEffect(() => {
         axiosApi.getHello().then(res => {
             console.log(res.data);
-            setMessage(res.data.username);
+            setMessage(res.data.user);
         }).catch(err => {
             console.log(err);
             setMessage("");
@@ -27,7 +27,7 @@ function TestAuth() {
     return (
         <div>
 
-            { message !== "" && (<div><h1>message</h1> <Button variant="contained" onClick={logout}>Logout</Button></div>)}
+            { message !== "" && (<div><h1>hello!</h1><h2>{message}</h2> <Button variant="contained" onClick={logout}>Logout</Button></div>)}
             { message === "" && <h1>need to sign in</h1>}
 
         </div>

@@ -194,7 +194,8 @@ Register user
 ### requirements
 ```
 pip install allauth
-pip install django-rest-auth
+pip install django-rest-auth (已不支援)
+pip install dj-rest-auth
 ```
 
 all-auth 第三方登入的資料庫
@@ -211,7 +212,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
 
-    'rest_auth'
+     'dj_rest_auth',
 ]
 ```
 
