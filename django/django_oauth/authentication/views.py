@@ -28,7 +28,7 @@ class CustomUserCreate(APIView):
 class HelloWorldView(APIView):
     def get(self, request):
         user = request.user
-        return Response(data={"hello":"world", "user": user.username, "title": user.title}, status=status.HTTP_200_OK)
+        return Response(data={"message":"hello world", "user": user.username, "title": user.title}, status=status.HTTP_200_OK)
 
 class GoogleLogin(SocialLoginView):
     permission_classes = (permissions.AllowAny,)

@@ -24,7 +24,9 @@
 ## Outline
 - <a href="#django-設定">Django 設定</a>
 - <a href="#django-rest-framework-and-JWT">Django-rest-framework and JWT</a>
-- 建立 React 專案
+- <a href="#react-設定">React 設定</a>
+- <a href="#google-sign-in-設定">Google sign in 設定</a>
+- <a href="#django-oauth">Django Oauth</a>
 ***
 ## Django 設定
 
@@ -50,6 +52,7 @@ python manage.py startapp authentication
 將 authentication app 加入 INSTALLED_APPS 中
 ```
 # setting.py
+
 INSTALLED_APPS = [
     ...
     'authentication',
@@ -66,6 +69,7 @@ INSTALLED_APPS = [
 title 就是我想要在 user model 裡面自己新增的欄位，並給上預測值 staff
 ```
 # authentication/models.py
+
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
@@ -75,6 +79,7 @@ class CustomUser(AbstractUser):
 註冊 custom user 到 admin
 ```
 # authentication/admin.py
+
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .models import CustomUser
@@ -84,6 +89,7 @@ admin.site.register(CustomUser, UserAdmin)
 最後在 settings.py 加上 AUTH_USER_MODEL
 ```
 # settings.py
+
 AUTH_USER_MODEL = "authentication.CustomUser"
 ```
 
@@ -111,6 +117,7 @@ pip install djangorestframework-simplejwt       # JWT authentication for drf
 ### 將 'rest_framework' 加到 INSTALLED_APPS
 ```
 # settings.py
+
 INSTALLED_APPS = [
     ...
     'rest_framework',
@@ -120,6 +127,7 @@ INSTALLED_APPS = [
 ### 在 settings.py 中加入 authentication 的 class
 ```
 # settings.py
+
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
@@ -131,6 +139,7 @@ REST_FRAMEWORK = {
 ### 加入 url
 ```
 # django_oauth/urls.py
+
 from django.contrib import admin
 from django.urls import path, include
 
@@ -143,6 +152,7 @@ urlpatterns = [
 ### 加入 jwt url
 ```
 # authentication/urls.py
+
 from django.urls import path
 from rest_framework_simplejwt import views as jwt_views
 
@@ -182,10 +192,125 @@ curl --header "Content-Type: application/json" -X POST http://localhost:8000/api
 postman:
 ![Alt text](/src/refresh_token_jwt.png)
   
+### 實測 authentication
+在 views.py 中新增一個 HelloWorldView  
+回傳 "hello world" 的 message 還有使用者名稱跟 title
+```
+# authentication/views.py
 
+from rest_framework.views import APIView
+class HelloWorldView(APIView):
+    def get(self, request):
+        user = request.user
+        return Response(data={"message":"hello world", "user": user.username, "title": user.title}, status=status.HTTP_200_OK)
+```  
+add url
+```
+# authentication/urls.py
 
-## Oauth (Google sign in)
+from .views import HelloWorldView
+urlpatterns = [
+    ...
+    path('hello/', HelloWorldView.as_view(), name='hello_world'),
+]
+```
   
+postman 實測:
+直接呼叫此API的話，會跳出沒有 authentication 的錯誤，因為我們還沒登入
+![Alt text](/src/test_hello.png)
+
+接著在 header 裡面加上我們剛剛拿到的 access token
+如此就能登入並且拿到資料囉
+{
+    "Authorization": Bearer {access token}
+}
+![Alt text](/src/test_hello_withAuth.png)
+
+
+### 在 JWT 中帶入額外資訊
+新增 serializers.py，把新增的 title 欄位也顯示在 JWT 資料中
+```
+# django_oauth/authentication/serializers.py
+
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+
+    @classmethod
+    def get_token(cls, user):
+        token = super(MyTokenObtainPairSerializer, cls).get_token(user)
+
+        # Add custom claims
+        token['title'] = user.title
+        return token
+```
+  
+加上 ObtainTokenPairWithCustomView
+```
+# django_oauth/authentication/views.py
+
+from rest_framework_simplejwt.views import TokenObtainPairView
+from .serializers import MyTokenObtainPairSerializer
+
+class ObtainTokenPairWithCustomView(TokenObtainPairView):
+    permission_classes = (permissions.AllowAny,)
+    serializer_class = MyTokenObtainPairSerializer
+```
+  
+加上 url
+```
+# django_oauth/authentication/urls.py
+
+from .views import ObtainTokenPairWithCustomView
+
+urlpatterns = [
+    ... 
+    path('token/custom_obtain/', ObtainTokenPairWithCutsomView.as_view(), name='token_create_custom'),
+]
+```
+  
+驗證：
+同樣用 curl 並帶入帳號密碼去索取 access token
+```
+curl --header "Content-Type: application/json" -X POST http://localhost:8000/api/token/custom_obtain/ --data '{"username":"username","password":"password"}'
+```
+
+接著把 access token 放到官方 debugger 去看內容是否帶有 title 資料了 (https://jwt.io/)
+可以看到圖中右方，payload 裡面有 title 了  
+![Alt text](/src/custom_obtain_token.png)
+  
+## React 設定
+### 建立 react 專案
+```
+npx create-react-app frontend
+cd frontend
+npm start
+```
+
+### 新增頁面
+
+
+## Google sign in 設定
+這邊以 Google sign in 為範例  
+先到 google developer console 申請 (https://console.developers.google.com/)  
+  
+1. 新增專案
+2. 輸入 project name
+3. create
+![Alt text](/src/create_project.png)
+  
+4. 到"憑證"頁面
+5. 建立憑證 -> 選 "Oauth 用戶端 ID"
+6. 應用程式類型選"網頁應用程式"
+7. 輸入名稱
+8. 輸入已授權的 JavaScript 來源以及重新導向 URI，填入 react 的網址(注意這邊要填localhost，因為google signin 只會辨別域名)
+![Alt text](/src/web_client.png)
+
+9. 記下 "用戶端 ID"
+![Alt text](/src/oauth_client.png)
+
+## Django Oauth
+
 ```
 pip install django-cors-headers                 # CORS 跨域
 pip install django-allauth                      # 第三方驗證

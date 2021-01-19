@@ -86,6 +86,7 @@ export default function Login() {
 
     const responseGoogle = async (response) => {
         let googleResponse = await axiosApi.googleLogin(response.accessToken);
+        console.log('googleResponse: \n', googleResponse);
 
         if (googleResponse.status === 200) {
             localStorage.setItem('access_token', googleResponse.data.access_token);
