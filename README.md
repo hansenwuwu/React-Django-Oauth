@@ -99,6 +99,8 @@ python manage.py runserver
 ***
 
 ## Django-rest-framework and JWT
+這邊說明如何用 django 實作 JWT 驗證機制
+詳細 JWT 為何請見官方說明(https://jwt.io/introduction)
 
 ### 安裝 package
 ```
@@ -155,20 +157,38 @@ urlpatterns = [
 python manage.py migrate
 ```
 
-### 實測
+### 實測 obtain token
 用 curl 測試，帶入剛剛 create super user 的帳號密碼，也可以用自己另外建立的帳號。
 ```
 curl --header "Content-Type: application/json" -X POST http://localhost:8000/api/token/obtain/ --data '{"username":"username","password":"password"}'
 ```
-
-或是用 postman 測試
+  
+postman:
 ![Alt text](/src/obtain_token_jwt.png)
   
 帳號密碼正確後，會得到一組 access_token, refresh_token
+- access token: client 端可以用這組 token 來向 server 索取資料，而 server 也利用這組來判斷 client 是否有被授權。時效通常不長。
+- refresh token: refresh token 是用來索取 access token 的。當 access token 過期時, 或是存取新的 resource 時，會用來索取 access token。時效通常比較長。
+關於為什麼明明 refresh token 也有辦法得到 access token 了，那幹嘛還要兩種 token 呢? 網路上有很多解釋，主要原因是為了安全因素，refresh token 只跟 authentication server 互動，而 access token 會需要跟一個或多個 resource server 互動，因此 access token 有比較大的機率暴露在危險之下，因此 access token 的時效設定為比較短，直到 access token 到期後，再用 refresh token 跟 authentication 再要一次 access token。
+  
+  
+### 實測 refresh token
+可以用 refresh token 去重新索取 access token
+curl:
+```
+curl --header "Content-Type: application/json" -X POST http://localhost:8000/api/token/refresh/ --data '{"refresh":"your refresh token here"}'
+```
+  
+postman:
+![Alt text](/src/refresh_token_jwt.png)
+  
 
 
+## Oauth (Google sign in)
+  
 ```
 pip install django-cors-headers                 # CORS 跨域
 pip install django-allauth                      # 第三方驗證
 pip install dj-rest-auth                        # 第三方驗證 API，和 django-allauth 搭配使用
 ```
+
