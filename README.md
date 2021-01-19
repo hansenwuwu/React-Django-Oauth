@@ -23,19 +23,14 @@
 ***
 ## Outline
 - <a href="#django-設定">Django 設定</a>
-- 加入 django-rest-framework 以及 JWT
+- <a href="#django-rest-framework-and-JWT">Django-rest-framework and JWT</a>
 - 建立 React 專案
 ***
 ## Django 設定
 
-### 安裝所需套件
+### Package
 ```
 pip install django
-pip install djangorestframework
-pip install djangorestframework-simplejwt       # JWT authentication
-pip install django-cors-headers                 # CORS 跨域
-pip install django-allauth                      # 第三方驗證
-pip install dj-rest-auth                        # 第三方驗證 API，和 django-allauth 搭配使用
 ```
 
 ### 建立 Django 專案
@@ -103,3 +98,77 @@ python manage.py runserver
 
 ***
 
+## Django-rest-framework and JWT
+
+### 安裝 package
+```
+pip install djangorestframework
+pip install djangorestframework-simplejwt       # JWT authentication for drf
+```
+  
+### 將 'rest_framework' 加到 INSTALLED_APPS
+```
+# settings.py
+INSTALLED_APPS = [
+    ...
+    'rest_framework',
+]
+```
+  
+### 在 settings.py 中加入 authentication 的 class
+```
+# settings.py
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': ('rest_framework_simplejwt.authentication.JWTAuthentication',)
+}
+```
+  
+### 加入 url
+```
+# django_oauth/urls.py
+from django.contrib import admin
+from django.urls import path, include
+
+urlpatterns = [
+    ...
+    path('api/', include('authentication.urls')),
+]
+```
+
+### 加入 jwt url
+```
+# authentication/urls.py
+from django.urls import path
+from rest_framework_simplejwt import views as jwt_views
+
+urlpatterns = [
+    path('token/obtain/', jwt_views.TokenObtainPairView.as_view(), name='token_create'),
+    path('token/refresh/', jwt_views.TokenRefreshView.as_view(), name='token_refresh'),
+]
+```
+
+### migrate
+```
+python manage.py migrate
+```
+
+### 實測
+用 curl 測試，帶入剛剛 create super user 的帳號密碼，也可以用自己另外建立的帳號。
+```
+curl --header "Content-Type: application/json" -X POST http://localhost:8000/api/token/obtain/ --data '{"username":"username","password":"password"}'
+```
+
+或是用 postman 測試
+![Alt text](/src/obtain_token_jwt.png)
+  
+帳號密碼正確後，會得到一組 access_token, refresh_token
+
+
+```
+pip install django-cors-headers                 # CORS 跨域
+pip install django-allauth                      # 第三方驗證
+pip install dj-rest-auth                        # 第三方驗證 API，和 django-allauth 搭配使用
+```
