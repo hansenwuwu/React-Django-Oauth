@@ -14,10 +14,9 @@ axiosInstance.interceptors.response.use(
     response => response,
     error => {
         const originalRequest = error.config;
+        const refresh_token = localStorage.getItem('refresh_token');
 
-        if (error.response.status === 401 && error.response.statusText === "Unauthorized" && localStorage.getItem('refresh_token')) {
-            const refresh_token = localStorage.getItem('refresh_token');
-
+        if (error.response.status === 401 && error.response.statusText === "Unauthorized" && refresh_token !== "undefined") {
             return axiosInstance
                 .post('/token/refresh/', { refresh: refresh_token })
                 .then((response) => {
@@ -31,7 +30,7 @@ axiosInstance.interceptors.response.use(
                     return axiosInstance(originalRequest);
                 })
                 .catch(err => {
-                    console.log(err)
+                    console.log('interceptors error: ', err)
                 });
         }
         return Promise.reject(error);
@@ -42,8 +41,10 @@ const apiUserLogin = (data) => {
     return axiosInstance
         .post('token/obtain/', data)
         .then((response) => {
-            return response.data;
+            console.log(response.statusText);
+            return response;
         }).catch(error => {
+            console.log('apiUserLogin error: ', error);
             return error;
         });
 };
